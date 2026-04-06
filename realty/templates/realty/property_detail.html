@@ -1,0 +1,248 @@
+{% extends "realty/base.html" %}
+
+{% block title %}{{ property.title }} | Ирина Анущенко{% endblock %}
+
+{% block extra_css %}
+<!-- Подключаем Swiper -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+    /* Дополнительные стили для галереи */
+    .swiper {
+        width: 100%;
+        height: auto;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .swiper-slide img {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        object-fit: contain;
+        background: #f0f0f0;
+    }
+    .swiper-pagination-bullet-active {
+        background: var(--primary) !important;
+    }
+    .swiper-button-prev,
+    .swiper-button-next {
+        color: var(--primary) !important;
+        background: rgba(255,255,255,0.8);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .swiper-button-prev::after,
+    .swiper-button-next::after {
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Хлебные крошки -->
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">Главная</a> &raquo;
+    <a href="{% url 'catalog' %}">Каталог</a> &raquo;
+    <span>{{ property.title|truncatechars:30 }}</span>
+</div>
+
+<div class="property-detail-container">
+    <h1 class="property-title">{{ property.title }}</h1>
+
+    <div class="property-detail-grid">
+        <!-- Левая колонка: фото (галерея Swiper) -->
+        <div class="property-image-box">
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    {% if property.main_image %}
+                        <div class="swiper-slide">
+                            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="property-main-image">
+                        </div>
+                    {% endif %}
+                    {% for img in property.images.all %}
+                        <div class="swiper-slide">
+                            <img src="{{ img.image.url }}" alt="{{ property.title }}" class="property-main-image">
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        </div>
+
+        <!-- Правая колонка: информация в карточках -->
+        <div class="property-info-boxes">
+            <div class="info-card">
+                <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="info-content">
+                    <span class="info-label">Адрес</span>
+                    <span class="info-value">{{ property.address }}</span>
+                </div>
+            </div>
+
+            <div class="info-card price-card">
+                <div class="info-icon"><i class="fas fa-tag"></i></div>
+                <div class="info-content">
+                    <span class="info-label">Цена</span>
+                    <span class="info-value price">{{ property.price|floatformat:0 }} ₽</span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon"><i class="fas fa-door-open"></i></div>
+                <div class="info-content">
+                    <span class="info-label">Комнат</span>
+                    <span class="info-value">{{ property.rooms }}</span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon"><i class="fas fa-vector-square"></i></div>
+                <div class="info-content">
+                    <span class="info-label">Площадь</span>
+                    <span class="info-value">{{ property.area }} м²</span>
+                </div>
+            </div>
+
+            <div class="info-card full-width">
+                <div class="info-icon"><i class="fas fa-align-left"></i></div>
+                <div class="info-content">
+                    <span class="info-label">Описание</span>
+                    <span class="info-value">{{ property.description|linebreaksbr }}</span>
+                </div>
+            </div>
+
+            <!-- Контакты с автоматическим учётом звонков -->
+            <div class="contacts-card">
+                <h3>Контакты</h3>
+                <div class="contact-item">
+                    <i class="fas fa-user"></i>
+                    <span>Ирина Анущенко</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <a href="tel:+79991234567" class="call-link" data-property-id="{{ property.id }}">+7 (999) 123-45-67</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <a href="tel:+79887654321" class="call-link" data-property-id="{{ property.id }}">+7 (988) 765-43-21</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>irina@example.com</span>
+                </div>
+            </div>
+
+            <!-- Блок статистики для администратора (виден только админу) -->
+            {% if request.user.is_staff %}
+            <div class="admin-stats-card">
+                <h3>Статистика для администратора</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Просмотров:</span>
+                    <span class="stat-value">{{ property.views_count }}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Звонков:</span>
+                    <span class="stat-value">{{ property.calls_count }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Кнопки "Поделиться" -->
+            <div class="share-block">
+                <h3>Поделиться</h3>
+                <div class="share-icons">
+                    <a href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ property.title }}" target="_blank" class="share-link telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://wa.me/?text={{ property.title }}%20{{ request.build_absolute_uri }}" target="_blank" class="share-link whatsapp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://vk.com/share.php?url={{ request.build_absolute_uri }}&title={{ property.title }}" target="_blank" class="share-link vk"><i class="fab fa-vk"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Похожие объекты -->
+    {% if similar_properties %}
+    <section class="similar-properties">
+        <h2>Похожие объекты</h2>
+        <div class="cards-grid">
+            {% for similar in similar_properties %}
+                <div class="card fade-in" data-id="{{ similar.id }}">
+                    <div class="favorite-icon" onclick="toggleFavorite({{ similar.id }})">
+                        <i class="{% if similar.id in favorites %}fas fa-heart active{% else %}far fa-heart{% endif %}"></i>
+                    </div>
+                    {% if similar.main_image %}
+                        <img src="{{ similar.main_image.url }}" alt="{{ similar.title }}">
+                    {% else %}
+                        <div class="no-image" style="height:220px; background:#eee; display:flex; align-items:center; justify-content:center;">Нет фото</div>
+                    {% endif %}
+                    <h3>{{ similar.title|truncatechars:40 }}</h3>
+                    <p class="address"><i class="fas fa-map-marker-alt"></i> {{ similar.address|truncatechars:35 }}</p>
+                    <p class="price">{{ similar.price|floatformat:0 }} ₽</p>
+                    <p class="details">{{ similar.rooms }} комн. • {{ similar.area }} м²</p>
+                    <a href="{% url 'property_detail' similar.id %}" class="details-link">Подробнее</a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    // Инициализация Swiper
+    var swiper = new Swiper(".mySwiper", {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+    });
+
+    // Автоматический учёт звонков при клике на номер
+    document.querySelectorAll('.call-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const propertyId = this.dataset.propertyId;
+            fetch(`/increment-call/${propertyId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            }).catch(err => console.log('Ошибка при учёте звонка', err));
+        });
+    });
+
+    // Функция для избранного (если не определена в base.html)
+    function toggleFavorite(propertyId) {
+        fetch(`/toggle-favorite/${propertyId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status) {
+                const icon = document.querySelector(`.card[data-id="${propertyId}"] .favorite-icon i`);
+                if (icon) {
+                    if (data.status === 'added') {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'active');
+                    } else {
+                        icon.classList.remove('fas', 'active');
+                        icon.classList.add('far');
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

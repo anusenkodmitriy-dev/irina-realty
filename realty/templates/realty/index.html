@@ -1,0 +1,235 @@
+{% extends "realty/base.html" %}
+{% load static %}
+
+{% block title %}Главная | Ирина Анущенко{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+{% endblock %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="hero fade-in">
+    <div class="hero-content">
+        <h1>Недвижимость в Краснодарском крае</h1>
+        <p class="hero-subtitle">Помогу найти дом вашей мечты</p>
+        <div class="hero-buttons">
+            <a href="{% url 'catalog' %}" class="btn-primary">Смотреть каталог</a>
+            <a href="#contacts" class="btn-secondary">Связаться со мной</a>
+        </div>
+    </div>
+</section>
+
+<!-- Статистика -->
+<section class="stats-section fade-in">
+    <div class="stats-grid">
+        <div class="stat-card" style="background: linear-gradient(145deg, #6CC24A, #3b8a2a);">
+            <div class="stat-number">10+</div>
+            <div class="stat-label">лет опыта</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(145deg, #FF6B6B, #c0392b);">
+            <div class="stat-number">150+</div>
+            <div class="stat-label">проданных объектов</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(145deg, #4A90E2, #2c3e50);">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">активных предложений</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(145deg, #F5A623, #d35400);">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">довольных клиентов</div>
+        </div>
+    </div>
+</section>
+
+<!-- Слайдер популярных объектов -->
+<section class="popular-section fade-in">
+    <h2>Популярные объекты</h2>
+    <div class="swiper popularSwiper">
+        <div class="swiper-wrapper">
+            {% for property in popular_properties %}
+            <div class="swiper-slide">
+                <div class="card" data-id="{{ property.id }}">
+                    <div class="favorite-icon" onclick="toggleFavorite({{ property.id }})">
+                        <i class="{% if property.id in favorites %}fas fa-heart active{% else %}far fa-heart{% endif %}"></i>
+                    </div>
+                    {% if property.main_image %}
+                        <img src="{{ property.main_image.url }}" alt="{{ property.title }}">
+                    {% else %}
+                        <div class="no-image" style="height:220px; background:#eee; display:flex; align-items:center; justify-content:center;">Нет фото</div>
+                    {% endif %}
+                    <h3>{{ property.title|truncatechars:40 }}</h3>
+                    <p class="address"><i class="fas fa-map-marker-alt"></i> {{ property.address|truncatechars:35 }}</p>
+                    <p class="price">{{ property.price|floatformat:0 }} ₽</p>
+                    <p class="details">{{ property.rooms }} комн. • {{ property.area }} м²</p>
+                    <a href="{% url 'property_detail' property.id %}" class="details-link">Подробнее</a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="swiper-slide">Пока нет популярных объектов</div>
+            {% endfor %}
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+</section>
+
+<!-- Блок преимуществ -->
+<section class="features-section fade-in">
+    <h2>Почему выбирают меня</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <i class="fas fa-gavel feature-icon" style="background: linear-gradient(45deg, #6CC24A, #FFD700); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+            <h3>Юридическая чистота</h3>
+            <p>Полная проверка документов и юридическое сопровождение сделки.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-hand-holding-usd feature-icon" style="background: linear-gradient(45deg, #FF6B6B, #c0392b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+            <h3>Помощь с ипотекой</h3>
+            <p>Подбор лучших ипотечных программ и помощь в одобрении.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-comments feature-icon" style="background: linear-gradient(45deg, #4A90E2, #2c3e50); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+            <h3>Бесплатные консультации</h3>
+            <p>Ответы на все вопросы о покупке, продаже и аренде.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-clock feature-icon" style="background: linear-gradient(45deg, #F5A623, #d35400); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+            <h3>Экономия времени</h3>
+            <p>Покажу только подходящие варианты, соответствующие вашим критериям.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Блок отзывов клиентов -->
+<section class="reviews-section fade-in">
+    <h2>Что говорят клиенты</h2>
+    <div class="swiper reviewsSwiper">
+        <div class="swiper-wrapper">
+            {% for review in reviews %}
+            <div class="swiper-slide">
+                <div class="review-card">
+                    <div class="review-header">
+                        {% if review.photo %}
+                            <img src="{{ review.photo.url }}" alt="{{ review.name }}" class="review-photo">
+                        {% else %}
+                            <div class="review-photo-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <div class="review-name">{{ review.name }}</div>
+                        <div class="review-rating">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="review-text">
+                        {{ review.text }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="swiper-slide">Пока нет отзывов</div>
+            {% endfor %}
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+</section>
+
+<!-- Последние объекты -->
+<section class="latest-properties fade-in">
+    <h2>Последние объекты</h2>
+    <div class="cards-grid">
+        {% for property in properties %}
+        <div class="card" data-id="{{ property.id }}">
+            <div class="favorite-icon" onclick="toggleFavorite({{ property.id }})">
+                <i class="{% if property.id in favorites %}fas fa-heart active{% else %}far fa-heart{% endif %}"></i>
+            </div>
+            {% if property.main_image %}
+                <img src="{{ property.main_image.url }}" alt="{{ property.title }}">
+            {% else %}
+                <div class="no-image" style="height:220px; background:#eee; display:flex; align-items:center; justify-content:center;">Нет фото</div>
+            {% endif %}
+            <h3>{{ property.title|truncatechars:40 }}</h3>
+            <p class="address"><i class="fas fa-map-marker-alt"></i> {{ property.address|truncatechars:35 }}</p>
+            <p class="price">{{ property.price|floatformat:0 }} ₽</p>
+            <p class="details">{{ property.rooms }} комн. • {{ property.area }} м²</p>
+            <a href="{% url 'property_detail' property.id %}" class="details-link">Подробнее</a>
+        </div>
+        {% empty %}
+        <p>Пока нет объектов</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    function toggleFavorite(propertyId) {
+        fetch(`/toggle-favorite/${propertyId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status) {
+                const icon = document.querySelector(`.card[data-id="${propertyId}"] .favorite-icon i`);
+                if (icon) {
+                    if (data.status === 'added') {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'active');
+                    } else {
+                        icon.classList.remove('fas', 'active');
+                        icon.classList.add('far');
+                    }
+                }
+            }
+        });
+    }
+
+    // Слайдер популярных объектов
+    new Swiper(".popularSwiper", {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: true,
+        pagination: { el: ".swiper-pagination", clickable: true },
+        navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+        breakpoints: {
+            640: { slidesPerView: 2, spaceBetween: 20 },
+            1024: { slidesPerView: 3, spaceBetween: 30 },
+        },
+    });
+
+    // Слайдер отзывов
+    new Swiper(".reviewsSwiper", {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: true,
+        pagination: { el: ".swiper-pagination", clickable: true },
+        navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+        breakpoints: {
+            640: { slidesPerView: 2, spaceBetween: 20 },
+            1024: { slidesPerView: 3, spaceBetween: 30 },
+        },
+    });
+
+    // Анимация появления
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.2 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    });
+</script>
+{% endblock %}

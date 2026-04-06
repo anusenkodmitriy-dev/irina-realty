@@ -1,0 +1,44 @@
+{% extends "realty/base.html" %}
+
+{% block content %}
+<h1>Избранное</h1>
+<div class="cards-grid">
+    {% for property in properties %}
+    <div class="card" data-id="{{ property.id }}">
+        <div class="favorite-icon" onclick="toggleFavorite({{ property.id }})">
+            <i class="fas fa-heart active"></i>
+        </div>
+        {% if property.main_image %}
+            <img src="{{ property.main_image.url }}" alt="">
+        {% else %}
+            <div style="height:220px; background:#eee; display:flex; align-items:center; justify-content:center;">Нет фото</div>
+        {% endif %}
+        <h3>{{ property.title|truncatechars:40 }}</h3>
+        <p class="address"><i class="fas fa-map-marker-alt"></i> {{ property.address|truncatechars:35 }}</p>
+        <p class="price">{{ property.price|floatformat:0 }} ₽</p>
+        <p class="details">{{ property.rooms }} комн. • {{ property.area }} м²</p>
+        <a href="{% url 'property_detail' property.id %}" class="details-link">Подробнее</a>
+    </div>
+    {% empty %}
+    <p>В избранном пока ничего нет</p>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFavorite(propertyId) {
+    fetch(`/toggle-favorite/${propertyId}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'removed') {
+            const card = document.querySelector(`.card[data-id="${propertyId}"]`);
+            if (card) card.remove();
+        }
+    });
+}
+</script>
+{% endblock %}

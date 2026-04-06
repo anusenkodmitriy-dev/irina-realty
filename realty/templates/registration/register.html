@@ -1,0 +1,75 @@
+{% extends "realty/base.html" %}
+
+{% block title %}Регистрация | Ирина Анущенко{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Регистрация</h1>
+    <form method="post" class="register-form">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <div class="error">{{ field.errors }}</div>
+                {% endif %}
+                {% if field.help_text %}
+                    <small class="help">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="apply-btn">Зарегистрироваться</button>
+    </form>
+    <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войдите</a></p>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #eef2f6;
+        border-radius: var(--border-radius-sm);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+    .form-group input:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108,194,74,0.2);
+    }
+    .error {
+        color: #ff4d4d;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    .help {
+        color: #777;
+        font-size: 0.85rem;
+        display: block;
+        margin-top: 5px;
+    }
+    .register-form button {
+        width: 100%;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}

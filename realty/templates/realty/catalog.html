@@ -1,0 +1,113 @@
+{% extends "realty/base.html" %}
+{% load catalog_tags %}
+
+{% block content %}
+<h1>Все объекты недвижимости</h1>
+
+<div class="row">
+    <div class="sidebar">
+        <form method="get">
+            <div class="filter-group">
+                <label>Поиск</label>
+                <input type="text" name="q" value="{{ request.GET.q }}">
+            </div>
+            <div class="filter-group">
+                <label>Цена, ₽</label>
+                <div class="price-row">
+                    <input type="number" name="price_min" value="{{ request.GET.price_min }}" placeholder="от">
+                    <input type="number" name="price_max" value="{{ request.GET.price_max }}" placeholder="до">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Комнаты</label>
+                <div class="rooms-checkboxes">
+                    <label><input type="checkbox" name="rooms" value="1" {% if '1' in selected_rooms %}checked{% endif %}> 1</label>
+                    <label><input type="checkbox" name="rooms" value="2" {% if '2' in selected_rooms %}checked{% endif %}> 2</label>
+                    <label><input type="checkbox" name="rooms" value="3" {% if '3' in selected_rooms %}checked{% endif %}> 3</label>
+                    <label><input type="checkbox" name="rooms" value="4" {% if '4' in selected_rooms %}checked{% endif %}> 4+</label>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Площадь, м²</label>
+                <div class="price-row">
+                    <input type="number" name="area_min" value="{{ request.GET.area_min }}" placeholder="от">
+                    <input type="number" name="area_max" value="{{ request.GET.area_max }}" placeholder="до">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Сортировка</label>
+                <select name="sort">
+                    <option value="">По умолчанию (новые)</option>
+                    <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Сначала дешёвые</option>
+                    <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Сначала дорогие</option>
+                    <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>Сначала новые</option>
+                    <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>Сначала старые</option>
+                </select>
+            </div>
+            <button type="submit" class="apply-btn">Применить</button>
+        </form>
+    </div>
+    <div class="content">
+        <div class="cards-grid">
+            {% for property in page_obj %}
+            <div class="card" data-id="{{ property.id }}">
+                <div class="favorite-icon" onclick="toggleFavorite({{ property.id }})">
+                    <i class="{% if property.id in favorites %}fas fa-heart active{% else %}far fa-heart{% endif %}"></i>
+                </div>
+                {% if property.main_image %}
+                    <img src="{{ property.main_image.url }}" alt="{{ property.title }}">
+                {% else %}
+                    <div style="height:220px; background:#eee; display:flex; align-items:center; justify-content:center;">Нет фото</div>
+                {% endif %}
+                <h3>{{ property.title|truncatechars:40 }}</h3>
+                <p class="address"><i class="fas fa-map-marker-alt"></i> {{ property.address|truncatechars:35 }}</p>
+                <p class="price">{{ property.price|floatformat:0 }} ₽</p>
+                <p class="details">{{ property.rooms }} комн. • {{ property.area }} м²</p>
+                <a href="{% url 'property_detail' property.id %}" class="details-link">Подробнее</a>
+            </div>
+            {% empty %}
+            <p>Ничего не найдено</p>
+            {% endfor %}
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?{% url_replace page=1 %}">&laquo;</a>
+                <a href="?{% url_replace page=page_obj.previous_page_number %}">&lsaquo;</a>
+            {% endif %}
+            <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?{% url_replace page=page_obj.next_page_number %}">&rsaquo;</a>
+                <a href="?{% url_replace page=page_obj.paginator.num_pages %}">&raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFavorite(propertyId) {
+    fetch(`/toggle-favorite/${propertyId}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status) {
+            const icon = document.querySelector(`.card[data-id="${propertyId}"] .favorite-icon i`);
+            if (icon) {
+                if (data.status === 'added') {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas', 'active');
+                } else {
+                    icon.classList.remove('fas', 'active');
+                    icon.classList.add('far');
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
