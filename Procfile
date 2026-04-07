@@ -1,1 +1,1 @@
-web: gunicorn irina_realty.wsgi 
+web: gunicorn irina_realty.wsgi
