@@ -1,9 +1,0 @@
-meta:
-  environment: python
-  toolchain: pip
-  version: 3.10
-
-run:
-  command: sh -c "pip install gunicorn psycopg2-binary whitenoise && gunicorn irina_realty.wsgi:application --bind 0.0.0.0:8000"
-  persistenceMount: /data
-  containerPort: 8000
