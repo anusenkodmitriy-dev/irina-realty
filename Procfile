@@ -1,1 +1,1 @@
-web: gunicorn irina_realty.wsgi
+web: gunicorn irina_realty.wsgi:application --bind 0.0.0.0:8000
