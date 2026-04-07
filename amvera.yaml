@@ -10,6 +10,7 @@ build:
     - python manage.py collectstatic --noinput
 
 run:
+  # Абсолютно правильная команда для вашей структуры
   command: gunicorn irina_realty.wsgi:application --bind 0.0.0.0:8000
   persistenceMount: /data
   containerPort: 8000
