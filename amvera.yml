@@ -1,0 +1,10 @@
+meta:
+  environment: python
+  toolchain: pip
+  version: 3.11
+build:
+  requirementsPath: requirements.txt
+run:
+  command: sh start.sh
+  persistenceMount: /data
+  containerPort: 8000
