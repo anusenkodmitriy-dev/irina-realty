@@ -1,0 +1,10 @@
+meta:
+  environment: python
+  toolchain: pip
+  version: 3.11
+build:
+  requirementsPath: requirements.txt
+run:
+  command: gunicorn irina_realty.wsgi:application --bind 0.0.0.0:8000
+  persistenceMount: /data
+  containerPort: 8000
