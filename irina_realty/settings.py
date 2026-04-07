@@ -1,15 +1,14 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
-load_dotenv()
+# Блокируем переменную DATABASE_URL, если она пришла из окружения
+if 'DATABASE_URL' in os.environ:
+    del os.environ['DATABASE_URL']
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-change-in-production')
-
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1').split(',')
 
