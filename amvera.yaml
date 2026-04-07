@@ -10,6 +10,6 @@ build:
     - python manage.py collectstatic --noinput
 
 run:
-  command: gunicorn irina_realty.wsgi:application --bind 0.0.0.0:8000
+  command: gunicorn irina_reality.wsgi:application
   persistenceMount: /data
   containerPort: 8000
