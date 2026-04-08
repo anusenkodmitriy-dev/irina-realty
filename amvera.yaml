@@ -1,0 +1,15 @@
+meta:
+  environment: python
+  toolchain: pip
+  version: 3.10
+
+build:
+  requirementsPath: requirements.txt
+  commands:
+    - pip install -r requirements.txt
+    - python manage.py collectstatic --noinput
+
+run:
+  command: gunicorn irina_reality.wsgi:application --bind 0.0.0.0:8000
+  persistenceMount: /data
+  containerPort: 8000
